@@ -1,0 +1,102 @@
+<html>
+<body>
+	<script type="text/javascript" src="./src/grid.js"></script>
+	<script type="text/javascript" src="./src/version.js"></script>
+	<script type="text/javascript" src="./src/detector.js"></script>
+	<script type="text/javascript" src="./src/formatinf.js"></script>
+	<script type="text/javascript" src="./src/errorlevel.js"></script>
+	<script type="text/javascript" src="./src/bitmat.js"></script>
+	<script type="text/javascript" src="./src/datablock.js"></script>
+	<script type="text/javascript" src="./src/bmparser.js"></script>
+	<script type="text/javascript" src="./src/datamask.js"></script>
+	<script type="text/javascript" src="./src/rsdecoder.js"></script>
+	<script type="text/javascript" src="./src/gf256poly.js"></script>
+	<script type="text/javascript" src="./src/gf256.js"></script>
+	<script type="text/javascript" src="./src/decoder.js"></script>
+	<script type="text/javascript" src="./src/qrcode.js"></script>
+	<script type="text/javascript" src="./src/findpat.js"></script>
+	<script type="text/javascript" src="./src/alignpat.js"></script>
+	<script type="text/javascript" src="./src/databr.js"></script>
+
+
+<style>
+	#canvas {
+		display: none;
+	}
+</style>
+
+
+<div id="promoNode"></div>
+
+	<video id="vv" width="640" height="480" autoplay></video>
+	<button id="snap">Snap Photo</button>
+	<button id="toDataUrl">To DataURL</button>
+	<canvas id="canvas" width="640" height="480"></canvas>
+
+	<script>
+
+		var sampleInterval;
+
+		qrcode.callback = function(d) {
+			if (d == 'error decoding QR Code') {}
+			else {
+				alert(d);
+				clearInterval(sampleInterval);
+			}
+		}
+
+		// Put event listeners into place
+		window.addEventListener("DOMContentLoaded", function() {
+			// Grab elements, create settings, etc.
+			var canvas = document.getElementById("canvas"),
+				context = canvas.getContext("2d"),
+				video = document.getElementById("vv"),
+				videoObj = { "video": true },
+				errBack = function(error) {
+					console.log("Video capture error: ", error.code); 
+				};
+
+			// Put video listeners into place
+			if(navigator.getUserMedia) { // Standard
+				navigator.getUserMedia(videoObj, function(stream) {
+					video.src = stream;
+					video.play();
+				}, errBack);
+			} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+				navigator.webkitGetUserMedia(videoObj, function(stream){
+					video.src = window.webkitURL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			} else if(navigator.mozGetUserMedia) { // WebKit-prefixed
+				navigator.mozGetUserMedia(videoObj, function(stream){
+					video.src = window.URL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			}
+
+			// Trigger photo take
+			document.getElementById("snap").addEventListener("click", function() {
+				context.drawImage(video, 0, 0, 640, 480);
+			});
+
+			document.getElementById('toDataUrl').addEventListener("click", sample);
+
+			sampleInterval = setInterval(sample, 500);
+		}, false);
+
+		function sample() {
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			var video = document.getElementById("vv");
+
+			context.drawImage(video, 0, 0, 640, 480);
+
+			var dataURL = document.getElementById('canvas').toDataURL();
+			qrcode.decode(dataURL);
+		}
+
+	</script>
+		
+</div>
+</body>
+</html>
